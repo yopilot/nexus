@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 const Chatbot: React.FC = () => {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{text: string, sender: 'user' | 'bot'}[]>([]);
+  const [messages, setMessages] = useState<{ text: string, sender: 'user' | 'bot' }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,9 +18,13 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Fetch the API key from environment variables
+      const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
       const response = await axios.post(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         contents: [{ parts: [{ text: input }] }]
       });
+
       const reply = response.data.candidates[0].content.parts[0].text;
       const botMessage = { text: reply, sender: 'bot' as const };
       setMessages(prev => [...prev, botMessage]);
@@ -36,7 +39,6 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-black text-white">
-        
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message, index) => (
           <div key={index} className={`${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
